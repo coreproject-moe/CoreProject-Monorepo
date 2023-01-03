@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class TrackersConfig(AppConfig):
+class TorrentTrackerConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "apps.trackers"
+    name = "torrent_tracker"

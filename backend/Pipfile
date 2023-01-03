@@ -32,6 +32,9 @@ httpx = {extras=['http2','brotli'],version="*"}
 # Web servers
 gunicorn = {extras = ["setproctile"], version = "*"}
 uvicorn = '*'
+# Torrent stuff
+fast-bencode = "*"
+django-picklefield = "*"
 
 [dev-packages]
 ## Watchfiles

@@ -71,7 +71,7 @@ INSTALLED_APPS = [
     "apps.api",
     # Models
     "apps.anime",
-    "apps.trackers",
+    "apps.user_stat_trackers",
     "apps.characters",
     "apps.producers",
     "apps.studios",

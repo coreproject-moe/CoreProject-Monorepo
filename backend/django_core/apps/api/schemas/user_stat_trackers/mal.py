@@ -1,4 +1,4 @@
-from apps.trackers.models import MalModel
+from apps.user_stat_trackers.models import MalModel
 from ninja import ModelSchema
 
 

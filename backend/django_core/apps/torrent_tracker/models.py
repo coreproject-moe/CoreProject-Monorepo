@@ -65,8 +65,8 @@ class Torrent(models.Model):
 
     upload_datetime = models.DateTimeField(default=timezone.now)
 
-    class Meta:
-        abstract = True
+    # We are going for many to many peers
+    peers = models.ManyToManyField("Peer")
 
 
 class Peer(models.Model):
@@ -78,9 +78,6 @@ class Peer(models.Model):
 
     def __str__(self) -> str:
         return f"{self.peer_id} {self.peer_ip} {str(self.peer_port)} {str(self.last_seen)}"
-
-    class Meta:
-        abstract = True
 
 
 class TorrentPasskey(models.Model):

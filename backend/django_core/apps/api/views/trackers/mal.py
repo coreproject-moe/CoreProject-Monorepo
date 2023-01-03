@@ -1,4 +1,4 @@
-from apps.trackers.models import MalModel
+from apps.user_stat_trackers.models import MalModel
 from ninja import Router
 
 from django.contrib.auth.decorators import login_required
@@ -6,7 +6,7 @@ from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
-from ...schemas.trackers import MALGETSchema, MALPOSTSchema
+from ...schemas.user_stat_trackers.mal import MALGETSchema, MALPOSTSchema
 
 router = Router()
 

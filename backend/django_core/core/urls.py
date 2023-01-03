@@ -39,6 +39,7 @@ urlpatterns = [
     #   HTTP
     # =========
     path("user/", include("apps.user.urls")),
+    path("tracker/", include("apps.torrent_tracker.urls")),
     #   Api
     # ========
     path("api/", include("apps.api.urls")),

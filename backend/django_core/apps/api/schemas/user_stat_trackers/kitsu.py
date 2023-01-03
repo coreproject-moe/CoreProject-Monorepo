@@ -1,4 +1,4 @@
-from apps.trackers.models import KitsuModel
+from apps.user_stat_trackers.models import KitsuModel
 from ninja import ModelSchema
 
 

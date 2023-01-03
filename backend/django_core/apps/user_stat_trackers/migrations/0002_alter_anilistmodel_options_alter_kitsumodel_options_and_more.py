@@ -4,9 +4,8 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ("trackers", "0001_initial"),
+        ("user_stat_trackers", "0001_initial"),
     ]
 
     operations = [

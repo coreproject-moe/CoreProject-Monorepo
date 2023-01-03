@@ -7,10 +7,10 @@ from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
 from django.db.models import QuerySet
 
-from bencode import bdecode, bencode
+from bencode import bencode
 
 from .models import TorrentPasskey
-from .models import Peer
+from .models import Peer, Torrent
 from .utils.get_parameters import identity, fill_typed_get_parameters
 
 
@@ -109,9 +109,7 @@ def compact_peer_lists(peers: QuerySet[Peer]) -> tuple[bytes, bytes]:
     return (ipv4, ipv6)
 
 
-def bittorrent_announce(
-    request: HttpRequest, passkey: str, torrent_type: str
-) -> HttpResponse:
+def bittorrent_announce(request: HttpRequest, passkey: str) -> HttpResponse:
     try:
         passkey_db = TorrentPasskey.objects.get(key=passkey)
         user = passkey_db.user
@@ -165,34 +163,30 @@ def bittorrent_announce(
     current_time = timezone.now()
     expiry_time = current_time - datetime.timedelta(hours=12)
 
-    if torrent_type == "music":
-        # Get the MusicTorrent object, or fail if it doesn't exist
-        try:
-            torrent = MusicTorrent.objects.get(infohash_sha1_hexdigest=info_hash)
-        except MusicTorrent.DoesNotExist:
-            return BencodedResponse({"failure reason": "Torrent does not exist."})
+    # Get the MusicTorrent object, or fail if it doesn't exist
+    try:
+        torrent = Torrent.objects.get(infohash_sha1_hexdigest=info_hash)
+    except Torrent.DoesNotExist:
+        return BencodedResponse({"failure reason": "Torrent does not exist."})
 
-        # Get the peer object, or create one if it doesn't exist
-        try:
-            peer = MusicTorrentPeer.objects.get(peer_id=get_params["peer_id"])
-            peer.peer_ip = get_params["ip"]
-            peer.peer_port = get_params["port"]
-            peer.peer_bytes_left = get_params["left"]
-            peer.last_seen = current_time
-            peer.save()
-        except MusicTorrentPeer.DoesNotExist:
-            peer = MusicTorrentPeer(
-                torrent=torrent,
-                peer_id=get_params["peer_id"],
-                peer_ip=get_params["ip"],
-                peer_port=get_params["port"],
-                peer_bytes_left=get_params["left"],
-            )
-            peer.save()
-    else:
-        return BencodedResponse(
-            {"failure reason": "Unrecognised URL (invalid torrent type)."}
+    # Get the peer object, or create one if it doesn't exist
+    try:
+        peer = Peer.objects.get(peer_id=get_params["peer_id"])
+        peer.peer_ip = get_params["ip"]
+        peer.peer_port = get_params["port"]
+        peer.peer_bytes_left = get_params["left"]
+        peer.last_seen = current_time
+        peer.save()
+    except Peer.DoesNotExist:
+        peer = Peer(
+            torrent=torrent,
+            peer_id=get_params["peer_id"],
+            peer_ip=get_params["ip"],
+            peer_port=get_params["port"],
+            peer_bytes_left=get_params["left"],
         )
+        peer.save()
+        torrent.peers.add(peer)
 
     # Update upload and download totals for the user
     if get_params["uploaded"] > 0 or get_params["downloaded"] > 0:

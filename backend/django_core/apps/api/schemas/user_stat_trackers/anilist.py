@@ -1,4 +1,4 @@
-from apps.trackers.models import AnilistModel
+from apps.user_stat_trackers.models import AnilistModel
 from ninja import ModelSchema
 
 

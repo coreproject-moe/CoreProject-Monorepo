@@ -1,17 +1,18 @@
 import datetime
-import ipaddress
 import urllib.parse
-from typing import Any
 
 from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
 from django.db.models import QuerySet
 
-from bencode import bencode
-
+from .utils.get_raw_urlstring import get_raw_querystring_value
+from .responses import BencodedResponse
+from .utils.compact_peer_list import compact_peer_lists
 from .models import TorrentPasskey
 from .models import Peer, Torrent
 from .utils.get_parameters import identity, fill_typed_get_parameters
+
+EXPIERY_TIME = 12
 
 
 def peer_id(x: str) -> str:
@@ -20,59 +21,22 @@ def peer_id(x: str) -> str:
     return x
 
 
-def port(x: int) -> int:
-    y = int(x)
-    if y < 0 or y > 65535:
+def port(port_number: int) -> int:
+    if 0 < port_number <= 65535:
         raise ValueError
-    return y
+    return port_number
 
 
-def byte_size(x: int) -> int:
-    y = int(x)
-    if y < 0:
+def byte_size(size: int) -> int:
+    if size < 0:
         raise ValueError
-    return y
+    return size
 
 
-def event(x: str) -> str:
-    if x not in ["started", "completed", "stopped", "empty"]:
+def event(_event_: str) -> str:
+    if _event_ not in ["started", "completed", "stopped", "empty"]:
         raise ValueError
-    return x
-
-
-def BencodedResponse(x: dict) -> HttpResponse:
-    return HttpResponse(bencode(x), content_type="text/plain")
-
-
-# Django mangles raw bytes encoded with URL encoding in the query string by
-# first decoding them into bytes, and then attempting to decode
-# that into UTF-8.
-#
-# This means that whenever any of the raw bytes don't line up with a
-# unicode codepoint, they get replaced with the � character (unicode name
-# 'REPLACEMENT CHARACTER', with a hex of `0xEF 0xBF 0xBD`).
-#
-# This is the fault of the django `QueryDict` object.
-#
-# As specified in the bittorrent protocol, the `info_hash` key in the
-# query string comes to us with its value set to a raw sha1 digest
-# (a series of bytes). Thus, we have to use this function instead
-# of the `QueryDict` object from the `HttpRequest` object for this key.
-def get_raw_querystring_value(request: HttpRequest, key: str) -> Any:
-    qs = request.META["QUERY_STRING"]
-    qs_key = key + "="
-
-    start = qs.find(qs_key) + len(qs_key)
-
-    if start == -1:
-        return None
-
-    end = qs.find("&", start)
-
-    if end == -1:
-        return qs[start:]
-    else:
-        return qs[start:end]
+    return _event_
 
 
 # Bloated representation of peers specified in the original version of
@@ -82,31 +46,16 @@ def get_raw_querystring_value(request: HttpRequest, key: str) -> Any:
 def bloated_peer_list(peers: QuerySet[Peer]) -> list[dict]:
     peer_list = []
 
-    for i in peers:
-        peer_list.append({"peer id": i.peer_id, "ip": i.peer_ip, "port": i.peer_port})
+    for peer in peers:
+        peer_list.append(
+            {
+                "peer id": peer.peer_id,
+                "ip": peer.peer_ip,
+                "port": peer.peer_port,
+            }
+        )
 
     return peer_list
-
-
-# Compact representation of peers.
-#
-# Initial BEP: https://www.bittorrent.org/beps/bep_0023.html
-# IPv6 extension: https://www.bittorrent.org/beps/bep_0007.html
-def compact_peer_lists(peers: QuerySet[Peer]) -> tuple[bytes, bytes]:
-    ipv4 = b""
-    ipv6 = b""
-
-    for i in peers:
-        ip = ipaddress.ip_address(i.peer_ip)
-
-        if ip.version == 4:
-            ipv4 += ip.packed + i.peer_port.to_bytes(2, byteorder="big")
-        elif ip.version == 6:
-            ipv6 += ip.packed + i.peer_port.to_bytes(2, byteorder="big")
-        else:
-            raise ValueError("Unknown IP version.")
-
-    return (ipv4, ipv6)
 
 
 def bittorrent_announce(request: HttpRequest, passkey: str) -> HttpResponse:
@@ -161,7 +110,7 @@ def bittorrent_announce(request: HttpRequest, passkey: str) -> HttpResponse:
     info_hash = urllib.parse.unquote_to_bytes(info_hash_url_encoded).hex()
 
     current_time = timezone.now()
-    expiry_time = current_time - datetime.timedelta(hours=12)
+    expiry_time = current_time - datetime.timedelta(hours=EXPIERY_TIME)
 
     # Get the MusicTorrent object, or fail if it doesn't exist
     try:
@@ -202,7 +151,9 @@ def bittorrent_announce(request: HttpRequest, passkey: str) -> HttpResponse:
 
     return BencodedResponse(
         {
-            "interval": 60 * 60 * 12,  # specified in seconds, so this is equal to 12 hours
+            "interval": datetime.timedelta(
+                hours=EXPIERY_TIME
+            ).total_seconds(),  # specified in seconds, so this is equal to 12 hours
             "peers": ipv4,
             "peers6": ipv6,
         }

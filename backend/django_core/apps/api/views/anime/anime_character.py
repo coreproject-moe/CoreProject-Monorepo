@@ -1,9 +1,7 @@
 from apps.anime.models import AnimeModel
 from apps.characters.models import CharacterModel
-from core.permissions import is_superuser
 from ninja import Router
 
-from django.contrib.auth.decorators import user_passes_test
 from django.http import HttpRequest
 from django.shortcuts import get_list_or_404, get_object_or_404
 
@@ -18,13 +16,12 @@ def get_individual_anime_character_info(
     anime_id: int,
 ) -> list[CharacterModel]:
     query = get_list_or_404(
-        get_object_or_404(AnimeModel, id=anime_id).anime_characters,
+        get_object_or_404(AnimeModel, pk=anime_id).characters,
     )
     return query
 
 
 @router.post("/{int:anime_id}/character", response=list[CharacterSchema])
-@user_passes_test(is_superuser)
 def post_individual_anime_character_info(
     request: HttpRequest,
     anime_id: int,
@@ -39,6 +36,6 @@ def post_individual_anime_character_info(
         **payload.dict(),
     )
     instance: CharacterModel = query[0]
-    anime_info_model.anime_characters.add(instance)
+    anime_info_model.characters.add(instance)
 
     return instance

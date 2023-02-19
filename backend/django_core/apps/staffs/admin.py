@@ -4,4 +4,12 @@ from .models import StaffAlternateNameModel, StaffModel
 
 # Register your models here.
 
-admin.site.register([StaffModel, StaffAlternateNameModel])
+
+@admin.register(StaffModel)
+class StaffModelAdmin(admin.ModelAdmin[StaffModel]):
+    pass
+
+
+@admin.register(StaffAlternateNameModel)
+class StaffAlternateNameAdmin(admin.ModelAdmin[StaffAlternateNameModel]):
+    pass

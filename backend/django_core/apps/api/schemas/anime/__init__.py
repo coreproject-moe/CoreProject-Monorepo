@@ -1,11 +1,9 @@
-from apps.anime.models import AnimeModel
+from apps.anime.models import AnimeModel, AnimeNameSynonymModel
 from ninja import ModelSchema
 from pydantic import AnyUrl
 
 from django.conf import settings
 from django.shortcuts import resolve_url
-
-from ...schemas.anime.anime_synonym import AnimeSynonymSchema
 
 ## Observations from getting request from stack trace
 # So initial ovservation is that our code call was reduced from
@@ -23,74 +21,51 @@ from ...schemas.anime.anime_synonym import AnimeSynonymSchema
 ## Take a look at issue(526)
 
 
+class AnimeNameSynonymSchema(ModelSchema):
+    class Config:
+        model = AnimeNameSynonymModel
+        model_fields = ["name"]
+
+
 class AnimeInfoGETSchema(ModelSchema):
-    anime_genres: AnyUrl
-    anime_producers: AnyUrl
-    anime_studios: AnyUrl
-    anime_characters: AnyUrl
-    anime_name_synonyms: list[AnimeSynonymSchema] = []
-    anime_theme: AnyUrl
+    genres: AnyUrl
+    producers: AnyUrl
+    studios: AnyUrl
+    characters: AnyUrl
+    themes: AnyUrl
     episode: AnyUrl
+    name_synonyms: list[AnimeNameSynonymSchema] = []
 
     class Config:
         model = AnimeModel
-        model_fields = [
-            "mal_id",
-            "anime_name",
-            "anime_name_japanese",
-            "anime_source",
-            "anime_aired_from",
-            "anime_aired_to",
-            "anime_banner",
-            "anime_cover",
-            "anime_synopsis",
-            "anime_background",
-            "anime_rating",
-            "updated",
-            "anime_name_synonyms",
-        ]
+        model_fields = "__all__"
 
     @staticmethod
-    def resolve_anime_genres(obj: AnimeModel) -> str:
+    def resolve_genres(obj: AnimeModel) -> str:
         url = resolve_url("api-1.0.0:get_individual_anime_genre_info", anime_id=obj.pk)
         return f"{settings.HOSTNAME}{url}"
 
     @staticmethod
-    def resolve_anime_producers(obj: AnimeModel) -> str:
+    def resolve_producers(obj: AnimeModel) -> str:
         url = resolve_url("api-1.0.0:get_individual_anime_producer_info", anime_id=obj.pk)
         return f"{settings.HOSTNAME}{url}"
 
     @staticmethod
-    def resolve_anime_studios(obj: AnimeModel) -> str:
+    def resolve_studios(obj: AnimeModel) -> str:
         url = resolve_url("api-1.0.0:get_individual_anime_studio_info", anime_id=obj.pk)
         return f"{settings.HOSTNAME}{url}"
 
     @staticmethod
-    def resolve_anime_characters(obj: AnimeModel) -> str:
+    def resolve_characters(obj: AnimeModel) -> str:
         url = resolve_url("api-1.0.0:get_individual_anime_character_info", anime_id=obj.pk)
         return f"{settings.HOSTNAME}{url}"
 
     @staticmethod
-    def resolve_anime_theme(obj: AnimeModel) -> str:
+    def resolve_themes(obj: AnimeModel) -> str:
         url = resolve_url("api-1.0.0:get_individual_anime_theme_info", anime_id=obj.pk)
         return f"{settings.HOSTNAME}{url}"
 
     @staticmethod
     def resolve_episode(obj: AnimeModel) -> str:
-        url = resolve_url("api-1.0.0:get_individual_anime_episodes", anime_id=obj.pk)
+        url = resolve_url("api-1.0.0:get_individual_episodes", anime_id=obj.pk)
         return f"{settings.HOSTNAME}{url}"
-
-
-class AnimeInfoPOSTSchema(ModelSchema):
-    class Config:
-        model = AnimeModel
-        model_exclude = [
-            "anime_genres",
-            "anime_themes",
-            "anime_studios",
-            "anime_producers",
-            "anime_name_synonyms",
-            "anime_episodes",
-            "anime_recommendation",
-            "anime_characters",
-        ]

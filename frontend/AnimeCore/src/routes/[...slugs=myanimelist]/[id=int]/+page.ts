@@ -4,14 +4,15 @@ import { MAL } from "$data/urls";
 
 import type { PageLoad } from "./$types";
 
-export const load: PageLoad = async ({
+export const load = (async ({
     params
     // ,fetch // Use this if you want Server Side Fetch | https://kit.svelte.dev/docs/hooks#externalfetch
 }) => {
-    const url = new MAL().id(params.id);
+    const mal_id = new MAL();
+    const data_url = mal_id.id(params.id);
 
-    const response = await fetch(url);
-    const data = await response?.json();
+    const data_response = await fetch(data_url);
+    const data = await data_response?.json();
 
     const jikan_data: Partial<{
         mal_id: number;
@@ -171,6 +172,8 @@ export const load: PageLoad = async ({
         ];
     }> = data.data;
 
+    console.log(data.data);
+
     const jikan_remapped_to_backend: Partial<{
         mal_id: number;
         episodes: [
@@ -208,4 +211,4 @@ export const load: PageLoad = async ({
         animeData: jikan_remapped_to_backend,
         error: errorMessage
     };
-};
+}) satisfies PageLoad;

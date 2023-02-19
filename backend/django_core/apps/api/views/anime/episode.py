@@ -1,9 +1,7 @@
 from apps.anime.models import AnimeModel
 from apps.episodes.models import EpisodeModel
-from core.permissions import is_superuser
 from ninja import Router
 
-from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpRequest
 from django.shortcuts import get_list_or_404, get_object_or_404
 
@@ -13,24 +11,18 @@ router = Router()
 
 
 @router.get("/{int:anime_id}/episodes", response=list[EpisodeGETSchema])
-def get_individual_anime_episodes(
+def get_individual_episodes(
     request: HttpRequest,
     anime_id: int,
 ) -> list[EpisodeModel]:
     query = get_list_or_404(
-        get_object_or_404(AnimeModel, id=anime_id).anime_episodes,
+        get_object_or_404(AnimeModel, pk=anime_id).episodes,
     )
     return query
 
 
-# I will work on this
-# File upload is broken
-# https://github.com/vitalik/django-ninja/issues/371
-# https://django-ninja.rest-framework.com/tutorial/file-params/
 @router.post("/{int:anime_id}/episodes", response=EpisodeGETSchema)
-@login_required
-@user_passes_test(is_superuser)
-def post_individual_anime_episodes(
+def post_individual_episodes(
     request: HttpRequest,
     anime_id: int,
     payload: EpisodePOSTSchema,
@@ -44,6 +36,6 @@ def post_individual_anime_episodes(
     )
 
     instance: EpisodeModel = query[0]
-    anime_info_model.anime_studios.add(instance)
+    anime_info_model.studios.add(instance)
 
     return instance

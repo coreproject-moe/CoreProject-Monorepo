@@ -8,6 +8,10 @@ export class MAL {
     public id = (id: number | string) => {
         return `${this.BASE_URL}/${id}/full`;
     };
+
+    public pictures = (id: number | string) => {
+        return `${this.BASE_URL}/${id}/pictures`;
+    };
 }
 
 export class Kitsu {
@@ -28,6 +32,7 @@ export class Anilist {
 
 export class UrlMaps {
     public get media_url() {
-        return process.env.NODE_ENV === "development" ? get(page).url.origin : "/media";
+        // return process.env.NODE_ENV === "development" ? get(page).url.origin : "/media";
+        return get(page).url.origin;
     }
 }

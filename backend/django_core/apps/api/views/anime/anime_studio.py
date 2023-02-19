@@ -1,9 +1,7 @@
 from apps.anime.models import AnimeModel
 from apps.studios.models import StudioModel
-from core.permissions import is_superuser
 from ninja import Router
 
-from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpRequest
 from django.shortcuts import get_list_or_404, get_object_or_404
 
@@ -18,15 +16,13 @@ def get_individual_anime_studio_info(
     anime_id: int,
 ) -> list[StudioModel]:
     query = get_list_or_404(
-        get_object_or_404(AnimeModel, id=anime_id).anime_studios,
+        get_object_or_404(AnimeModel, pk=anime_id).studios,
     )
 
     return query
 
 
 @router.post("/{int:anime_id}/studios", response=StudioSchema)
-@login_required
-@user_passes_test(is_superuser)
 def post_individual_anime_studio_info(
     request: HttpRequest,
     anime_id: int,
@@ -42,6 +38,6 @@ def post_individual_anime_studio_info(
     )
 
     instance: StudioModel = query[0]
-    anime_info_model.anime_studios.add(instance)
+    anime_info_model.studios.add(instance)
 
     return instance

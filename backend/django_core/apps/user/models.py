@@ -1,5 +1,4 @@
-from functools import partial
-from typing import Any, NoReturn, Self
+from typing import Any
 
 from dynamic_filenames import FilePattern
 
@@ -8,7 +7,6 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
-from django.utils.crypto import get_random_string
 from django.utils.translation import gettext_lazy as _
 
 from .managers import UserManager
@@ -56,16 +54,16 @@ class CustomUser(
             "Unselect this instead of deleting accounts."
         ),
     )
-    username_discriminator = models.BigIntegerField(
+    discriminator = models.BigIntegerField(
         blank=True,
         null=True,
         help_text=(
             "Optional. "
-            f"{settings.USERNAME_DISCRIMINATOR_LENGTH} characters or fewer. "
-            "If not provided a random `username_discriminator` will be selected."
+            f"{settings.DISCRIMINATOR_LENGTH } characters or fewer. "
+            "If not provided a random `discriminator` will be selected."
         ),
         validators=[
-            MaxValueValidator(int(9 * settings.USERNAME_DISCRIMINATOR_LENGTH)),
+            MaxValueValidator(int(9 * settings.DISCRIMINATOR_LENGTH)),
             MinValueValidator(1),  # Same thing but remove negative digits
         ],
     )
@@ -90,7 +88,7 @@ class CustomUser(
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = [
         "username",
-        "username_discriminator",
+        "discriminator",
     ]
 
     def get_username_with_discriminator(self) -> str:
@@ -100,14 +98,14 @@ class CustomUser(
             }#{
                 str(
                     self
-                    .username_discriminator
+                    .discriminator
                 )
                 .zfill(
-                    settings.USERNAME_DISCRIMINATOR_LENGTH
+                    settings.DISCRIMINATOR_LENGTH
                 )
             }"""
 
-    def save(self: Self, *args: tuple, **kwargs: dict[str, Any]) -> NoReturn:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         super().save(*args, **kwargs)
 
     def __str__(self) -> str:
@@ -118,22 +116,5 @@ class CustomUser(
         verbose_name = _("user")
         verbose_name_plural = _("users")
         unique_together = [
-            ("username", "username_discriminator"),
+            ("username", "discriminator"),
         ]
-
-
-class Token(models.Model):
-    token = models.CharField(
-        default=partial(get_random_string, 16),
-        max_length=16,
-        editable=False,
-    )
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-
-    def __str__(self) -> str:
-        return f"User : {self.user.username} | Token : {self.token}"
-
-    class Meta:
-        db_table = "user_token"
-        verbose_name = _("token")
-        verbose_name_plural = _("tokens")

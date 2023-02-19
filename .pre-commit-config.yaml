@@ -1,54 +1,48 @@
 repos:
     - repo: https://github.com/pre-commit/mirrors-eslint
-      rev: v8.31.0
+      rev: v8.34.0
       hooks:
           - id: eslint
             args: [
-                    ./frontend,
+                    "./frontend",
                     # --config,
                     # ./frontend/AnimeCore/.eslintrc.cjs,
                     --ignore-pattern,
-                    /backend/static/*,
+                    "/backend/static/*",
                     --fix,
                 ]
             additional_dependencies:
-                - "next@12.2.0"
-                - "eslint-config-next@12.1.6"
-                - typescript@4.7.4
-                - "@emotion/eslint-plugin@11.7.0"
-                - eslint@8.16.0
-                - eslint-config-prettier@8.5.0
-                - eslint-plugin-svelte3@4.0.0
-                - svelte@3.53.1
-                - "@typescript-eslint/eslint-plugin@5.25.0"
-                - "@typescript-eslint/parser@5.25.0"
-                - eslint-plugin-simple-import-sort@7.0.0
-                - eslint-plugin-unused-imports@2.0.0
-                - typescript@4.7.4
+                # - "next@12.2.0"
+                # - "eslint-config-next@12.1.6"
+                # - react@18.2.0
+                # - "@emotion/eslint-plugin@11.7.0"
+                - react@latest
+                - eslint-plugin-react@latest
+                - eslint-config-airbnb@latest
+                - eslint-plugin-react-native@latest
+                - eslint-plugin-react-hooks@latest
+                - eslint-plugin-jsx-a11y@latest
+                - eslint-plugin-import@latest
+                # Svelte Related
+                - eslint@latest
+                - eslint-config-prettier@latest
+                - eslint-plugin-svelte3@latest
+                - svelte@latest
+                - "@typescript-eslint/eslint-plugin@latest"
+                - "@typescript-eslint/parser@latest"
+                - eslint-plugin-simple-import-sort@latest
+                - eslint-plugin-unused-imports@latest
+                - typescript@latest
 
     - repo: https://github.com/rtts/djhtml
-      rev: "v1.5.2" # replace with the latest tag on GitHub
+      rev: "v2.0.0" # replace with the latest tag on GitHub
       hooks:
           - id: djhtml
           - id: djcss
           - id: djjs
 
-    - repo: https://github.com/PyCQA/autoflake
-      rev: "v2.0.0"
-      hooks:
-          - id: autoflake
-            args:
-                [
-                    "-i",
-                    "--remove-all-unused-imports",
-                    "--recursive",
-                    "--ignore-init-module-imports",
-                    "--expand-star-imports",
-                    "--remove-unused-variables",
-                ]
-
     - repo: https://github.com/psf/black
-      rev: 22.12.0
+      rev: 23.1.0
       hooks:
           - id: black
             args: ["--line-length", "92", "--target-version", "py311"]
@@ -85,14 +79,29 @@ repos:
                 - prettier@2.6.2
                 - prettier-plugin-svelte@2.7.0
 
-    - repo: https://github.com/PyCQA/isort
-      rev: 5.11.4
-      hooks:
-          - id: isort
-            args: [--profile, black, --ca, --cs]
-
     - repo: https://github.com/asottile/pyupgrade
       rev: v3.3.1
       hooks:
           - id: pyupgrade
             args: [--py311-plus]
+
+    - repo: https://github.com/tox-dev/pyproject-fmt
+      rev: "0.9.0"
+      hooks:
+          - id: pyproject-fmt
+
+    - repo: https://github.com/charliermarsh/ruff-pre-commit
+      # Ruff version.
+      rev: "v0.0.246"
+      hooks:
+          - id: ruff
+            # Respect `exclude` and `extend-exclude` settings.
+            args:
+                [
+                    "--fix",
+                    "--respect-gitignore",
+                    "--exclude",
+                    "./android",
+                    "--exclude",
+                    "./tools",
+                ]

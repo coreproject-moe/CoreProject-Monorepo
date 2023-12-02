@@ -69,8 +69,8 @@ async def anime_explore_view(request: "HtmxHttpRequest") -> HttpResponse:
 
 async def anime_info_view(
     request: "HtmxHttpRequest",
-    platform: str,
     pk: int,
+    platform: str = "",
 ) -> HttpResponse:
     if request.htmx:
         return render(

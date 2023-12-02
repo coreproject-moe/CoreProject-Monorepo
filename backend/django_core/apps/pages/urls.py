@@ -24,8 +24,8 @@ urlpatterns = [
                     name="anime_home_view_partial_slider_view",
                 ),
                 path("explore/", anime_explore_view, name="anime_explore_view"),
-                path(
-                    "<str:platform>/",
+                re_path(
+                    r"((?P<platform>\w+/)|)",
                     include(
                         [
                             path("<int:pk>/", anime_info_view, name="anime_info_view"),

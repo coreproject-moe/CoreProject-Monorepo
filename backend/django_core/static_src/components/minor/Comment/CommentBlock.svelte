@@ -19,6 +19,7 @@
 
     // import Images
     import DefaultAvatar from "../../../public/images/defaults/avatar.png";
+    import YoimiyaSticker from "../../../public/images/stickers/Yoimiya.png";
 
     // Import icons
     import Arrow from "$icons/Arrow/Index.svelte";
@@ -26,6 +27,9 @@
     import Share from "$icons/Share/Index.svelte";
     import Cross from "$icons/Cross/Index.svelte";
     import Expand from "$icons/Expand/Index.svelte";
+    import Dot from "$icons/Dot/Index.svelte";
+    import Report from "$icons/Report/Index.svelte";
+    import Save from "$icons/Save/Index.svelte";
 
     // Bindings
     let user_reaction: typeof item.user_reaction,
@@ -33,7 +37,8 @@
         reply_shown = false,
         comment_highlight_el: HTMLDivElement,
         show_comment_highlighted = false,
-        icon_mapping = ["upvote", "downvote"];
+        icon_mapping = ["upvote", "downvote"],
+        report_dialog: HTMLDialogElement;
 
     onMount(async () => {
         const url_params = new URLSearchParams(window.location.search);
@@ -95,6 +100,20 @@
         } else {
             await post_to_reaction_endpoint(reaction as "upvote" | "downvote");
         }
+    };
+
+    const handle_report_comment_click = async () => {
+        const res = await fetch(reverse("comment-report-endpoint", item.pk), {
+            method: "POST",
+            headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+                "X-CSRFToken": get_csrf_token()
+            }
+        });
+        if (res.ok) {
+            report_dialog.showModal();
+        };
     };
 </script>
 
@@ -213,6 +232,58 @@
                     <Share class="w-4 md:w-[1vw]" />
                     <span>Share</span>
                 </button>
+                <div class="dropdown">
+                    <div
+                        tabindex="0"
+                        role="button"
+                        class="btn btn-ghost h-max min-h-max md:p-[0.5vw] md:gap-[0.15vw] rounded-full"
+                    >
+                        {#each Array(3).fill(0) as _}
+                            <Dot class="md:w-[0.2vw]" />
+                        {/each}
+                    </div>
+                    <ul class="dropdown-content z-10 md:mt-[0.25vw] overflow-hidden bg-neutral md:rounded-[0.5vw]">
+                        <button
+                            on:click={handle_report_comment_click}
+                            class="cursor-pointer flex items-center md:gap-[0.5vw] transition-colors hover:bg-secondary/25 md:px-[1vw] md:py-[0.5vw] md:text-[1vw] w-full"
+                        >
+                            <Report class="md:size-[1.25vw]" />
+                            <span>Report</span>
+                        </button>
+                        <button class="cursor-pointer flex items-center md:gap-[0.5vw] transition-colors hover:bg-secondary/25 md:px-[1vw] md:py-[0.5vw] md:text-[1vw] w-full">
+                            <Save class="md:size-[1.25vw]" />
+                            <span>Save</span>
+                        </button>
+                    </ul>
+                </div>
+                <dialog
+                    bind:this={report_dialog}
+                    id="report_modal"
+                    class="modal"
+                >
+                    <div class="modal-box md:w-[30vw] md:max-w-[30vw] bg-neutral relative md:rounded-[1vw] md:p-[1.25vw]">
+                        <div class="absolute -z-10 inset-0 size-full bg-secondary/50"></div>
+                        <h3 class="font-semibold md:text-[1.25vw]">
+                            <span class="text-warning">Thank you!</span>
+                            Got your report.
+                        </h3>
+                        <div class="grid md:grid-cols-[2fr_3fr] md:mt-[1vw] md:gap-[0.5vw]">
+                            <img src={YoimiyaSticker} alt="">
+                            <div class="flex flex-col md:gap-[0.5vw]">
+                                <p class="md:text-[1vw] md:leading-[1.5vw] italic">
+                                    Your report has been acknowledged, and our team will review the comment accordingly. We appreciate your assistance in keeping our platform safe and enjoyable for all users.
+                                </p>
+                                <div class="modal-action mt-0">
+                                    <form method="dialog">
+                                        <button class="btn glass bg-primary btn-primary h-max min-h-max md:px-[1.25vw] md:py-[0.9vw] md:text-[1vw]">
+                                            Done
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </dialog>
             </div>
         </div>
         {#if reply_shown}

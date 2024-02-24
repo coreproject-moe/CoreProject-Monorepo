@@ -15,6 +15,7 @@ from .views.anime.theme import AnimeThemesAPIView, AnimeThemesSpecificAPIView
 from .views.characters import CharacterViewSet
 from .views.comment import CommentViewSet
 from .views.comment.reaction import CommentReactionAPIView
+from .views.comment.report import CommentReportAPIView
 from .views.producers import ProducerViewSet
 from .views.staffs import StaffViewSet
 from .views.user.login import LoginAPIView
@@ -38,48 +39,58 @@ urlpatterns = [
     # Routers
     path("", include(base_router.urls)),
     # Anime specific routes
-    path(
-        "anime/<int:pk>/comment",
-        AnimeCommentAPIView.as_view(),
-        name="anime-commment-endpoint",
-    ),
-    path("anime/genres/", AnimeGenresAPIView.as_view()),
-    path("anime/genres/<int:pk>/", AnimeGenresSpecificAPIView.as_view()),
-    path("anime/themes/", AnimeThemesAPIView.as_view()),
-    path("anime/themes/<int:pk>/", AnimeThemesSpecificAPIView.as_view()),
+    path("anime/", include([
+        path(
+            "<int:pk>/comment",
+            AnimeCommentAPIView.as_view(),
+            name="anime-commment-endpoint",
+        ),
+        path("genres/", AnimeGenresAPIView.as_view()),
+        path("genres/<int:pk>/", AnimeGenresSpecificAPIView.as_view()),
+        path("themes/", AnimeThemesAPIView.as_view()),
+        path("themes/<int:pk>/", AnimeThemesSpecificAPIView.as_view()),
+    ])),
     # Episode
-    path(
-        "anime/<int:pk>/episode/",
-        EpisodeAPIView.as_view(),
-    ),
-    path(
-        "anime/<int:pk>/episode/<int:episode_number>/comment",
-        EpisodeCommentAPIView.as_view(),
-        name="episode-comment-endpoint",
-    ),
-    path(
-        "anime/<int:pk>/episode/<int:episode_number>/timestamp",
-        EpisodeTimeStampAPIView.as_view(),
-    ),
+    path("anime/<int:pk>/episode/", include([
+        path("", EpisodeAPIView.as_view()),
+        path(
+            "<int:episode_number>/comment",
+            EpisodeCommentAPIView.as_view(),
+            name="episode-comment-endpoint",
+        ),
+        path(
+            "<int:episode_number>/timestamp",
+            EpisodeTimeStampAPIView.as_view(),
+        ),
+    ])),
     # User routes
-    path("user/login/", LoginAPIView.as_view(), name="login-endpoint"),
-    path("user/logout/", LogoutAPIView.as_view(), name="logout-endpoint"),
-    path(
-        "user/validity/username",
-        UsernameValiditiyAPIView.as_view(),
-        name="username-validity-endpoint",
-    ),
-    path(
-        "user/validity/email",
-        EmailValiditiyAPIView.as_view(),
-        name="email-validity-endpoint",
-    ),
+    path("user/", include([
+        path("login/", LoginAPIView.as_view(), name="login-endpoint"),
+        path("logout/", LogoutAPIView.as_view(), name="logout-endpoint"),
+        path(
+            "validity/username",
+            UsernameValiditiyAPIView.as_view(),
+            name="username-validity-endpoint",
+        ),
+        path(
+            "validity/email",
+            EmailValiditiyAPIView.as_view(),
+            name="email-validity-endpoint",
+        ),
+    ])),
     # Comment routes
-    path(
-        "comment/<int:pk>/reaction/",
-        CommentReactionAPIView.as_view(),
-        name="comment-reaction-endpoint",
-    ),
+    path("comment/<int:pk>/", include([
+        path(
+            "reaction/",
+            CommentReactionAPIView.as_view(),
+            name="comment-reaction-endpoint",
+        ),
+        path(
+            "report/",
+            CommentReportAPIView.as_view(),
+            name="comment-report-endpoint",
+        ),
+    ])),
     # Upload route
     path(
         "upload/",

@@ -34,3 +34,18 @@ class CommentModel(CreatedAtMixin, TreeModel):
         indexes = [idx.GistIndex(fields=["path"])]
         verbose_name = "Comment"
         verbose_name_plural = "Comments"
+
+class ReportedCommentModel(CreatedAtMixin, models.Model):
+    comment = models.ForeignKey(CommentModel, on_delete=models.CASCADE, null=True, blank=True)
+    reports = models.ManyToManyField(CustomUser, blank=True, related_name="reports")
+
+    @property
+    def reports_count(self) -> int:
+        return self.reports.count()
+
+    def __str__(self) -> str:
+        return f"Comment by {self.comment.user} | {self.reports_count} reports"
+
+    class Meta:
+        verbose_name = "Reported Comment"
+        verbose_name_plural = "Reported Comments"

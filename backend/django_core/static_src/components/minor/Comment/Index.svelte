@@ -32,9 +32,20 @@
 
     let last_element: HTMLElement;
 
+    let specific_comment_path: string | undefined;
+
     onMount(() => {
+        const url_params = new URLSearchParams(window.location.search);
+        if (url_params.has("comment")) {
+            const comment_path = url_params.get("comment");
+            const updated_api_url = `/api/v2/comments/?path=${comment_path}`;
+            api_url = updated_api_url;
+            specific_comment_path = comment_path!;
+        };
+
         set_comments();
     });
+
     onDestroy(() => {
         // Clean up
         tree_branch = new Array<Comment>();
@@ -56,7 +67,8 @@
 
                     return new JSONToTree({
                         json: value.results,
-                        old_json: tree_branch
+                        old_json: tree_branch,
+                        specific_path: specific_comment_path,
                     }).build() as unknown as Comment[];
 
                 case 404:
@@ -75,6 +87,7 @@
             get_comments(api_url)
                 .then((res) => {
                     tree_branch = res;
+                    console.log(res);
                     loading_state = "loaded";
                 })
                 .catch((err: string) => {
@@ -88,6 +101,14 @@
                     tree_branch = res;
                 });
             }
+        },
+        get_more_comments = async (e: CustomEvent) => {
+            const comment_path = e.detail.path;
+            const comment_api_url = `/api/v2/comments/?path=${comment_path}`;
+            specific_comment_path = comment_path;
+            get_comments(comment_api_url).then((res) => {
+                tree_branch = res;
+            });
         };
 
     // Store to trigger updates
@@ -122,6 +143,7 @@
                 <CommentBlock
                     item={branch}
                     {submit_url}
+                    on:moreComments={get_more_comments}
                 />
             {/each}
         </div>

@@ -25,13 +25,14 @@ export default defineConfig({
         }
     },
     plugins: [
-        tailwindcss(),
+
         svelte({
             compilerOptions: {
                 customElement: true
             },
             configFile: join(process.cwd(), "svelte.config.js")
-        })
+        }),
+        tailwindcss(),
     ],
     css: {
         devSourcemap: true,

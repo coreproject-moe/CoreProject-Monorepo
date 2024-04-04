@@ -1,5 +1,5 @@
 // import css
-import "./css/index.postcss";
+import "./css/index.css";
 
 // Import htmx
 import "htmx.org";

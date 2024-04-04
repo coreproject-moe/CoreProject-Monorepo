@@ -1,7 +1,7 @@
 import tailwind from "$functions/tailwind";
 import { createMediaStore } from "svelte-media-queries";
 
-const breakpoints = tailwind.theme.screens;
+const breakpoints = {}
 
 type BreakpointKey = keyof typeof breakpoints;
 type Breakpoints = Record<BreakpointKey, string>;

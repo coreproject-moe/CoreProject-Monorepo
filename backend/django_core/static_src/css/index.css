@@ -1,9 +1,6 @@
 @import url("./nprogress.scss");
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-@tailwind variants;
+@import "tailwindcss";
 
 @font-face {
     font-family: "Kokoro";

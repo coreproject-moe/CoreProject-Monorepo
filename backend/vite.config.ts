@@ -2,7 +2,7 @@ import { join, resolve } from "path";
 import process from "process";
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-
+import tailwindcss from "@tailwindcss/vite";
 const STATIC_SRC = resolve("./django_core/static_src");
 
 const COMPONENT_DIRECTORY = join(STATIC_SRC, "components");
@@ -25,6 +25,7 @@ export default defineConfig({
         }
     },
     plugins: [
+        tailwindcss(),
         svelte({
             compilerOptions: {
                 customElement: true

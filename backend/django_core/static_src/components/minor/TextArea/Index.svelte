@@ -22,10 +22,11 @@
         caret_offset_left: string | null = null;
 
     // External Bindings
+    export let path: string;
     export let textarea_value = "";
 
     onMount(() => {
-        const comment_store_value = get(commentbox_value);
+        const comment_store_value = get(commentbox_value).find((item) => item.path === path)?.text;
         if (comment_store_value) {
             textarea_value = comment_store_value;
         }
@@ -482,7 +483,8 @@
         on:paste|preventDefault={(event) => paste_text(event)}
         on:input={handle_input}
         on:input={(event) => {
-            $commentbox_value = event.currentTarget.value;
+            let commentbox = $commentbox_value.find((item) => item.path === path);
+            if (commentbox) commentbox.text = event.currentTarget.value;
         }}
         on:keydown={handle_keydown}
         on:blur={handle_blur}

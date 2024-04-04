@@ -42,7 +42,14 @@
         if (res.ok) {
             comment_needs_update.set(true);
             textarea_value = "";
-            commentbox_value.set("");
+            commentbox_value.update((item) => {
+                const el = item.find((i) => i.path === path);
+                if (!el) return;
+                const index = item.indexOf(el)! as number;
+                if (!index) return;
+                item[index] = new Array<{ path: string; text: string }>();
+                return item;
+            });
             dispatch("submit");
         }
     };
@@ -50,7 +57,10 @@
 
 <div class="flex flex-col gap-3 md:gap-[0.75vw]">
     <div class="ring-surface-300/25 relative flex flex-col rounded-lg ring-[0.15rem] transition duration-300 focus-within:ring-primary md:rounded-[0.75vw] md:ring-[0.15vw]">
-        <TextArea bind:textarea_value />
+        <TextArea
+            bind:textarea_value
+            {path}
+        />
     </div>
     <div class="flex justify-between gap-5 md:gap-[1vw]">
         <comment-alert class="flex items-center gap-3 md:gap-[0.625vw]">

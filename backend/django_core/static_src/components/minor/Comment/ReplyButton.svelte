@@ -5,7 +5,6 @@
     import Chat from "$icons/Chat/Index.svelte";
 
     const dispatch = createEventDispatcher();
-    export const handle_mobile = () => console.log(1);
 
     const handle_mobile_click = () => {
             dispatch("mobile_reply");

@@ -7,7 +7,6 @@
 
     import { beforeUpdate, createEventDispatcher } from "svelte";
     import Markdown from "$components/minor/Markdown/Index.svelte";
-    import * as _ from "lodash-es";
     import { z } from "zod";
     import { handle_input } from "../../functions/handle_input";
     import { zxcvbn, zxcvbnOptions, type OptionsType } from "@zxcvbn-ts/core";
@@ -85,7 +84,7 @@
 
     function check_if_form_is_submitable() {
         form_is_submitable = [email, password, confirm_password].every((field) => {
-            return field.value && _.isEmpty(field.error);
+            return field.value && field.error.length === 0;
         });
     }
 
@@ -112,7 +111,7 @@
 
     const handle_email_input = async (event: Event) => {
             handle_input({ event: event, schema: z.string().email("Please enter a valid email address"), error_field: email });
-            if (_.isEmpty(email.error)) {
+            if (email.error.length === 0) {
                 const res = await fetch(reverse("email-validity-endpoint"), {
                     method: "POST",
                     headers: {
@@ -212,7 +211,7 @@
             />
             <div class="flex items-center gap-2 text-xs leading-none md:gap-[0.5vw] md:text-[0.75vw]">
                 <Info class="w-3 opacity-70 md:w-[0.9vw]" />
-                {#if _.isEmpty(email.error) || _.isEmpty(email.value)}
+                {#if email.error.length === 0 || email.value.length === 0}
                     <span>we’ll send you a verification email, so please ensure it’s active</span>
                 {:else}
                     <span class="text-error">
@@ -258,7 +257,7 @@
                             {@const value = item[1]}
 
                             <div class="flex items-center gap-2 md:gap-[0.5vw]">
-                                {#if (_.isEmpty(password.error) && _.isEmpty(password.value)) || (password.value && password.error.includes(key))}
+                                {#if (password.error.length === 0 && password.value.length === 0) || (password.value && password.error.includes(key))}
                                     <div>
                                         <Tick class="w-3 text-primary opacity-30 transition-opacity md:w-[1vw]" />
                                     </div>
@@ -292,7 +291,7 @@
                 class="w-full rounded-xl border-2 border-neutral bg-transparent p-3.5 px-5 text-base font-medium leading-none outline-none !ring-0 transition-colors duration-300 placeholder:text-white/50 focus:border-primary md:rounded-[0.75vw] md:border-[0.2vw] md:px-[1.1vw] md:py-[0.8vw] md:text-[1.1vw]"
             />
             <div class="flex items-center gap-2 text-xs leading-none md:gap-[0.5vw] md:text-[0.75vw]">
-                {#if _.isEmpty(confirm_password.error)}
+                {#if confirm_password.error.length === 0}
                     <Info class="w-3 opacity-70 md:w-[0.9vw]" />
                     <span>Please make sure you enter the same password in both fields</span>
                 {:else}

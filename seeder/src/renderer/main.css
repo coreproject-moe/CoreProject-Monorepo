@@ -25,6 +25,5 @@
 }
 
 * {
-	outline: none !important;
-	box-sizing: border-box;
+  @apply !outline-none select-none;
 }
